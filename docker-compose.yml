@@ -1,0 +1,16 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: WebServiceDB
+    restart: always
+    ports:
+      - "23306:3306"
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql  # 데이터 지속성 유지
+      - ./db/mysql/init:/docker-entrypoint-initdb.d  # 초기화 SQL 스크립트
+    environment:
+      MYSQL_ROOT_PASSWORD: 1118  # root 계정 비밀번호
+      MYSQL_DATABASE: WebServiceDB    # 생성할 데이터베이스 이름
+      MYSQL_CHARSET: utf8mb4          # 문자 인코딩
+      MYSQL_COLLATION: utf8mb4_unicode_ci  # 대조 문자
+      TZ: Asia/Seoul  # 타임존 설정
