@@ -1,50 +1,57 @@
 package com.example.webserviceclient.product.service;
 
+
+import com.example.webserviceclient.product.dto.GetDto;
 import com.example.webserviceclient.product.dto.SaveDto;
 import com.example.webserviceclient.product.dto.UpdateDto;
 import com.example.webserviceclient.product.entity.Product;
 import com.example.webserviceclient.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
 
-    public Product createProduct(SaveDto saveProductDto) {
+    @Transactional
+    public Long createProduct(SaveDto saveProductDto) {
         Product product = Product.builder()
                 .name(saveProductDto.getName())
                 .price(saveProductDto.getPrice())
                 .build();
-        return productRepository.save(product);
+        return productRepository.save(product).getId();
     }
 
-    public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+    @Transactional
+    public void updateProduct(Long id, UpdateDto updateDto) {
+        Product product = findMenuById(id);
+        product.update(updateDto.getName(), updateDto.getPrice());
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
-
-    public Product updateProduct(Long id, UpdateDto updateProductDto) {
-        return productRepository.findById(id)
-                .map(product -> {
-                    product.update(updateProductDto.getName(), updateProductDto.getPrice());
-                    return productRepository.save(product);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Product id를 찾을 수 없습니다: " + id));
-    }
-
+    @Transactional
     public void deleteProduct(Long id) {
-        if (productRepository.existsById(id)) {
-            productRepository.deleteById(id);
-        } else {
-            throw new IllegalArgumentException("Product id를 찾을 수 없습니다:" + id);
-        }
+        Product product = findMenuById(id);
+        productRepository.delete(product);
+    }
+
+    public List<GetDto> getAllProducts() {
+        List<GetDto> products = productRepository.findAll().stream()
+                .map(product -> GetDto.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .price(product.getPrice())
+                        .build())
+                .collect(Collectors.toList());
+        return products;
+    }
+
+    public Product findMenuById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(()->new IllegalArgumentException("해당 아이디가 없습니다. id =" + id));
     }
 }

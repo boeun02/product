@@ -1,8 +1,8 @@
-# Step 1: 베이스 이미지로 OpenJDK 사용
+# Step 1: 베이스 이미지로 Ubuntu를 사용
 FROM ubuntu:latest
 
 # Step 2: 작성자 정보
-LABEL authors="codej"
+LABEL authors="82108"
 
 # Step 3: 필요한 패키지 설치 (Java JDK 설치)
 RUN apt-get update && apt-get install -y openjdk-21-jdk

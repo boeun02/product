@@ -1,25 +1,32 @@
+version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: WebServiceDB
+    container_name: mysql
     restart: always
     ports:
       - "23306:3306"
     volumes:
-      - ./db/mysql/data:/var/lib/mysql  # 데이터 지속성 유지
-      - ./db/mysql/init:/docker-entrypoint-initdb.d  # 초기화 SQL 스크립트
+      - ./db/mysql/data:/var/lib/mysql
+      - ./db/mysql/init:/docker-entrypoint-initdb.d
     environment:
-      MYSQL_ROOT_PASSWORD: 1118  # root 계정 비밀번호
-      MYSQL_DATABASE: WebServiceDB    # 생성할 데이터베이스 이름
-      MYSQL_CHARSET: utf8mb4          # 문자 인코딩
-      MYSQL_COLLATION: utf8mb4_unicode_ci  # 대조 문자
-      TZ: Asia/Seoul  # 타임존 설정
+      MYSQL_ROOT_PASSWORD: 1118
+      MYSQL_DATABASE: WebServiceDB
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Seoul
 
-  spring-server:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      - mysql
+    container_name: app
+    restart: always
     ports:
       - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/WebServiceDB
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1118
